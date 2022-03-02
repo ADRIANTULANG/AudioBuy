@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.audiobuy">
    <application
-        android:label="audiobuy"
+        android:label="audiobai"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
