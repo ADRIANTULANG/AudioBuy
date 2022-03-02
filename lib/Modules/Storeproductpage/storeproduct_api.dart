@@ -151,4 +151,134 @@ class StoreProductApi {
       return Future.error(true);
     }
   }
+
+  static Future send_chat({
+    required String storeid,
+    required String customerid,
+    required String message,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/create-chat.php"),
+        body: {'receiver': storeid, 'sender': customerid, 'message': message},
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+      print(response.body);
+      // print(json.encode(json.decode(response.body)));
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          // var result = jsonDecode(response.body)['data'];
+          // return result;
+        } else {
+          return "error";
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('send_chat catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future<List<ChatModel>> get_all_Chats({
+    required String storeid,
+    required String customerid,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/get-chats.php"),
+        body: {
+          'storeid': storeid,
+          'customerid': customerid,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          var result =
+              chatModelFromJson(jsonEncode(jsonDecode(response.body)['data']));
+          return result;
+        } else {
+          return [];
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('get_all_Chats catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future update_seen_Status({
+    required String storeid,
+    required String customerid,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/update-chat-seen-status.php"),
+        body: {
+          'storeid': storeid,
+          'customerid': customerid,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          // var result =
+          //     chatModelFromJson(jsonEncode(jsonDecode(response.body)['data']));
+          // return result;
+        } else {
+          return "error";
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('update_seen_Status catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future delete_chats({
+    required String storeid,
+    required String customerid,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/delete-chat-history.php"),
+        body: {
+          'storeid': storeid,
+          'customerid': customerid,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          // var result =
+          //     chatModelFromJson(jsonEncode(jsonDecode(response.body)['data']));
+          // return result;
+        } else {
+          return "error";
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('delete_chats catch error $error');
+      return Future.error(true);
+    }
+  }
 }

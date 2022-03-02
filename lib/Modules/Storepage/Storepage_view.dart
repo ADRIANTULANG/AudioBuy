@@ -3,6 +3,7 @@ import 'package:audiobuy/Helpers/sizer.dart';
 import 'package:audiobuy/Helpers/storage.dart';
 
 import 'package:audiobuy/Modules/Storepage/Storepage_addProduct.dart';
+import 'package:audiobuy/Modules/Storepage/Storepage_chat.dart';
 import 'package:audiobuy/Modules/Storepage/Storepage_controller.dart';
 import 'package:audiobuy/Modules/Storepage/Storepage_for_approval.dart';
 import 'package:audiobuy/Modules/Storepage/Storepage_profileupdate.dart';
@@ -100,6 +101,35 @@ class StorePageView extends GetView<StorepageController> {
                   ),
                   Positioned(
                     top: sizer.height(height: 14, context: context),
+                    left: sizer.width(width: 1.5, context: context),
+                    child: Container(
+                      child: IconButton(
+                        onPressed: () {
+                          Get.to(() => StorepageChat());
+                        },
+                        icon: Obx(
+                          () => controller.hasMessageNotSeen.value == true
+                              ? Badge(
+                                  badgeContent: Text(" ! "),
+                                  child: Icon(
+                                    Icons.message,
+                                    color: Colors.white,
+                                    size: sizer.font(
+                                        fontsize: 35, context: context),
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.message,
+                                  color: Colors.white,
+                                  size: sizer.font(
+                                      fontsize: 35, context: context),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: sizer.height(height: 20, context: context),
                     left: sizer.width(width: 2.5, context: context),
                     child: Container(
                       child: IconButton(

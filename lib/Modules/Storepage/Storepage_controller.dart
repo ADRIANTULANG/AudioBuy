@@ -23,6 +23,9 @@ class StorepageController extends GetxController {
   TextEditingController storeusername = TextEditingController();
   TextEditingController storecontact = TextEditingController();
 
+  TextEditingController chatTextField = TextEditingController();
+  RxBool hasMessageNotSeen = false.obs;
+
   File? productimage;
   RxString productFilename = 'no-image.jpg'.obs;
   File? profileimage;
@@ -33,6 +36,10 @@ class StorepageController extends GetxController {
   RxList<OrdersForApproval> orderForApprovalList = <OrdersForApproval>[].obs;
   RxList<OrdersForApprovalDetails> orderForApprovalOrderDetails =
       <OrdersForApprovalDetails>[].obs;
+
+  RxList<ChatModelOfStore> chatsuser = <ChatModelOfStore>[].obs;
+
+  RxList<ChatModel> chats = <ChatModel>[].obs;
 
   RxString nameofstore = ''.obs;
   RxString addressofstore = ''.obs;
@@ -46,11 +53,14 @@ class StorepageController extends GetxController {
 
   Timer? streamforApprovedOrders;
 
+  Timer? chattimer;
+
   @override
   void onInit() {
     get_products();
     setData();
     stream_approved_orders();
+    get_chats_of_users();
     super.onInit();
   }
 
@@ -250,6 +260,8 @@ class StorepageController extends GetxController {
   stream_approved_orders() {
     streamforApprovedOrders = Timer.periodic(Duration(seconds: 10), (timer) {
       count_approved_order();
+      get_chats_of_users();
+      count_Chats();
     });
   }
 
@@ -377,5 +389,78 @@ class StorepageController extends GetxController {
       ),
       barrierDismissible: false,
     );
+  }
+
+  get_chats_of_users() async {
+    var result = await StoreApi.get_users_Chats(
+        storeid: Get.find<StorageService>().box.read('userid'));
+    chatsuser.assignAll(result);
+  }
+
+  sendMessage({required String customerid}) async {
+    var result = await StoreApi.send_chats(
+        storeid: Get.find<StorageService>().box.read('userid').toString(),
+        customerid: customerid,
+        message: chatTextField.text.toString());
+    print(result);
+    chatTextField.clear();
+    update_seen_status(customerid: customerid);
+  }
+
+  getChat({required String customerid}) async {
+    var result = await StoreApi.get_all_Chats(
+      storeid: Get.find<StorageService>().box.read('userid').toString(),
+      customerid: customerid,
+    );
+    chats.assignAll(result);
+    // var counts = 0;
+    // for (var i = 0; i < chats.length; i++) {
+    //   if (chats[i].receiver ==
+    //       Get.find<StorageService>().box.read('userid').toString()) {
+    //     if (chats[i].seen.toString() == "1") {
+    //       counts++;
+    //     } else {}
+    //   }
+    // }
+    // if (counts > 0) {
+    //   hasMessageNotSeen.value = true;
+    // } else {
+    //   hasMessageNotSeen.value = false;
+    // }
+    print(result);
+  }
+
+  start_stream_chat({required String customerid}) {
+    print("timer start");
+    chattimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      getChat(customerid: customerid);
+    });
+  }
+
+  update_seen_status({required String customerid}) async {
+    var result = await StoreApi.update_seen_Status(
+      storeid: Get.find<StorageService>().box.read('userid').toString(),
+      customerid: customerid,
+    );
+    print(result);
+  }
+
+  count_Chats() async {
+    var result = await StoreApi.count_chats(
+      storeid: Get.find<StorageService>().box.read('userid').toString(),
+    );
+    print(result);
+    if (result > 0) {
+      hasMessageNotSeen.value = true;
+    } else {
+      hasMessageNotSeen.value = false;
+    }
+  }
+
+  stopStream() {
+    chattimer!.cancel();
+    // delete_Chats();
+    Get.back();
+    print("timer stop");
   }
 }

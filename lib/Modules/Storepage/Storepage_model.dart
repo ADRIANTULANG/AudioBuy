@@ -149,3 +149,69 @@ class OrdersForApprovalDetails {
         "productQuantity": productQuantity,
       };
 }
+
+List<ChatModelOfStore> chatModelOfStoreFromJson(String str) =>
+    List<ChatModelOfStore>.from(
+        json.decode(str).map((x) => ChatModelOfStore.fromJson(x)));
+
+String chatModelOfStoreToJson(List<ChatModelOfStore> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class ChatModelOfStore {
+  ChatModelOfStore({
+    required this.sender,
+  });
+
+  String sender;
+
+  factory ChatModelOfStore.fromJson(Map<String, dynamic> json) =>
+      ChatModelOfStore(
+        sender: json["sender"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "sender": sender,
+      };
+}
+
+List<ChatModel> chatModelFromJson(String str) =>
+    List<ChatModel>.from(json.decode(str).map((x) => ChatModel.fromJson(x)));
+
+String chatModelToJson(List<ChatModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class ChatModel {
+  ChatModel({
+    required this.chatid,
+    required this.message,
+    required this.sender,
+    required this.receiver,
+    required this.seen,
+    required this.date,
+  });
+
+  String chatid;
+  String message;
+  String sender;
+  String receiver;
+  String seen;
+  DateTime date;
+
+  factory ChatModel.fromJson(Map<String, dynamic> json) => ChatModel(
+        chatid: json["chatid"],
+        message: json["message"],
+        sender: json["sender"],
+        receiver: json["receiver"],
+        seen: json["seen"],
+        date: DateTime.parse(json["date"]),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "chatid": chatid,
+        "message": message,
+        "sender": sender,
+        "receiver": receiver,
+        "seen": seen,
+        "date": date.toIso8601String(),
+      };
+}

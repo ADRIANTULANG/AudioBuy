@@ -7,6 +7,7 @@ import 'package:audiobuy/Modules/ProviderPage/Provider_addServices.dart';
 import 'package:audiobuy/Modules/ProviderPage/Provider_profileupdate.dart';
 import 'package:audiobuy/Modules/ProviderPage/Provider_services_for_approval.dart';
 import 'package:audiobuy/Modules/ProviderPage/Provider_updateServices.dart';
+import 'package:audiobuy/Modules/ProviderPage/Providerpage_chat.dart';
 import 'package:badges/badges.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +80,7 @@ class ProviderPageView extends GetView<ProviderController> {
                   ),
                   Positioned(
                     top: sizer.height(height: 8, context: context),
-                    left: sizer.width(width: 2, context: context),
+                    left: sizer.width(width: 1.5, context: context),
                     child: Container(
                       child: IconButton(
                           onPressed: () async {
@@ -103,6 +104,35 @@ class ProviderPageView extends GetView<ProviderController> {
                   ),
                   Positioned(
                     top: sizer.height(height: 14, context: context),
+                    left: sizer.width(width: 1.5, context: context),
+                    child: Container(
+                      child: IconButton(
+                        onPressed: () {
+                          Get.to(() => ProviderPageChat());
+                        },
+                        icon: Obx(
+                          () => controller.hasMessageNotSeen.value == true
+                              ? Badge(
+                                  badgeContent: Text(" ! "),
+                                  child: Icon(
+                                    Icons.message,
+                                    color: Colors.white,
+                                    size: sizer.font(
+                                        fontsize: 35, context: context),
+                                  ),
+                                )
+                              : Icon(
+                                  Icons.message,
+                                  color: Colors.white,
+                                  size: sizer.font(
+                                      fontsize: 35, context: context),
+                                ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: sizer.height(height: 20, context: context),
                     left: sizer.width(width: 2.5, context: context),
                     child: Container(
                       child: IconButton(

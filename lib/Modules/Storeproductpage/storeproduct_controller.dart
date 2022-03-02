@@ -14,23 +14,30 @@ class StoreProductController extends GetxController {
   RxString storeaddress = ''.obs;
   RxString storecontanctno = ''.obs;
   TextEditingController searchTextField = TextEditingController();
+  TextEditingController chatTextField = TextEditingController();
 
   @override
   void onInit() async {
     storeid.value = await Get.arguments['storeid'];
     get_store_Details(storeid: storeid.value);
+    start_stream_chat();
     super.onInit();
   }
+
+  Timer? chattimer;
 
   Products? selectedProduct;
 
   RxBool isGettingStoreDetails = true.obs;
+
+  RxBool hasMessageNotSeen = false.obs;
 
   RxList<StoreDetails> storeDetails = <StoreDetails>[].obs;
 
   RxList<Products> storeProducts = <Products>[].obs;
   RxList<Products> storeProducts_MasterList = <Products>[].obs;
   RxList<CartModel> cartList = <CartModel>[].obs;
+  RxList<ChatModel> chats = <ChatModel>[].obs;
 
   RxBool isPlacingOrder = false.obs;
 
@@ -136,5 +143,68 @@ class StoreProductController extends GetxController {
               double.parse(cartList[i].productPrice));
     }
     return total.obs;
+  }
+
+  sendMessage() async {
+    var result = await StoreProductApi.send_chat(
+        storeid: storeid.value,
+        customerid: Get.find<StorageService>().box.read('userid').toString(),
+        message: chatTextField.text.toString());
+    print(result);
+    chatTextField.clear();
+    update_seen_status();
+  }
+
+  getChat() async {
+    var result = await StoreProductApi.get_all_Chats(
+      storeid: storeid.value,
+      customerid: Get.find<StorageService>().box.read('userid').toString(),
+    );
+    chats.assignAll(result);
+    var counts = 0;
+    for (var i = 0; i < chats.length; i++) {
+      if (chats[i].receiver ==
+          Get.find<StorageService>().box.read('userid').toString()) {
+        if (chats[i].seen.toString() == "1") {
+          counts++;
+        } else {}
+      }
+    }
+    if (counts > 0) {
+      hasMessageNotSeen.value = true;
+    } else {
+      hasMessageNotSeen.value = false;
+    }
+    print(result);
+  }
+
+  start_stream_chat() {
+    print("timer start");
+    chattimer = Timer.periodic(Duration(seconds: 3), (timer) {
+      getChat();
+    });
+  }
+
+  update_seen_status() async {
+    var result = await StoreProductApi.update_seen_Status(
+      storeid: storeid.value,
+      customerid: Get.find<StorageService>().box.read('userid').toString(),
+    );
+    print(result);
+  }
+
+  // delete_Chats() async {
+  //   var result = await StoreProductApi.delete_chats(
+  //     storeid: storeid.value,
+  //     customerid: Get.find<StorageService>().box.read('userid').toString(),
+  //   );
+  //   print(result);
+  // }
+
+  stopStream() {
+    chattimer!.cancel();
+    // delete_Chats();
+    Get.back();
+    print("timer stop");
   }
 }

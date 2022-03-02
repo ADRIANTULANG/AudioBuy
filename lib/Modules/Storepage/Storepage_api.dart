@@ -453,4 +453,166 @@ class StoreApi {
       return Future.error(true);
     }
   }
+
+//
+  static Future<List<ChatModelOfStore>> get_users_Chats(
+      {required String storeid}) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/get-chats-of-store.php"),
+        body: {
+          'storeid': storeid,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      // print(json.encode(json.decode(response.body)));
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          var result = jsonEncode(jsonDecode(response.body)['data']);
+
+          return chatModelOfStoreFromJson(result);
+        } else {
+          return [];
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('get_users_Chats catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future send_chats({
+    required String storeid,
+    required String customerid,
+    required String message,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/create-chat.php"),
+        body: {'receiver': customerid, 'sender': storeid, 'message': message},
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+      print(response.body);
+      // print(json.encode(json.decode(response.body)));
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          // var result = jsonDecode(response.body)['data'];
+          // return result;
+        } else {
+          return "error";
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('send_chat catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future<List<ChatModel>> get_all_Chats({
+    required String storeid,
+    required String customerid,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/get-chats.php"),
+        body: {
+          'storeid': storeid,
+          'customerid': customerid,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          var result =
+              chatModelFromJson(jsonEncode(jsonDecode(response.body)['data']));
+          return result;
+        } else {
+          return [];
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('get_all_Chats catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future update_seen_Status({
+    required String storeid,
+    required String customerid,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/update-chat-seen-status.php"),
+        body: {
+          'storeid': customerid,
+          'customerid': storeid,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          // var result =
+          //     chatModelFromJson(jsonEncode(jsonDecode(response.body)['data']));
+          // return result;
+        } else {
+          return "error";
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('update_seen_Status catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future count_chats({
+    required String storeid,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/count-chats.php"),
+        body: {
+          'storeid': storeid,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          var result = jsonDecode(response.body)['data'];
+          var counts = int.parse(result[0]['counts']);
+          print(counts);
+          print(counts.runtimeType);
+          return counts;
+        } else {
+          return 0;
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('update_seen_Status catch error $error');
+      return Future.error(true);
+    }
+  }
 }
