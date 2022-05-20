@@ -127,6 +127,7 @@ class StoreApi {
       required String ProductDescription,
       required String productStoreID,
       required String productImage,
+      required String productCount,
       required File? imageFile}) async {
     try {
       var response = await http.post(
@@ -137,6 +138,7 @@ class StoreApi {
           'ProductDescription': ProductDescription,
           'productStoreID': productStoreID,
           'productImage': productImage,
+          'productCount': productCount,
         },
       ).timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException("timeout");
@@ -224,6 +226,7 @@ class StoreApi {
     required String productPrice,
     required String productDescription,
     required String productImage,
+    required String productCount,
     required File? imageFile,
     required String productid,
   }) async {
@@ -236,6 +239,7 @@ class StoreApi {
           'productDescription': productDescription,
           'productImage': productImage,
           'productPrice': productPrice,
+          'productCount': productCount,
         },
       ).timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException("timeout");

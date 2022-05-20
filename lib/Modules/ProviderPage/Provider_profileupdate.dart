@@ -3,6 +3,7 @@ import 'package:audiobuy/Helpers/sizer.dart';
 import 'package:audiobuy/Modules/ProviderPage/ProviderPage_controller.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ProviderUpdateProfile extends GetView<ProviderController> {
   const ProviderUpdateProfile({
@@ -165,18 +166,36 @@ class ProviderUpdateProfile extends GetView<ProviderController> {
                   padding: EdgeInsets.only(
                       left: sizer.width(width: 4, context: context),
                       right: sizer.width(width: 4, context: context)),
-                  child: TextField(
-                    controller: controller.providerpasswordtext,
-                    decoration: InputDecoration(
-                        prefix: Icon(
-                          Icons.lock,
-                          color: Colors.black,
-                        ),
-                        labelText: 'Password',
-                        labelStyle: TextStyle(
-                            fontSize:
-                                sizer.font(fontsize: 12, context: context),
-                            color: Colors.black)),
+                  child: Obx(
+                    () => TextField(
+                      controller: controller.providerpasswordtext,
+                      obscureText: controller.dontShowPassword.value,
+                      decoration: InputDecoration(
+                          prefix: Icon(
+                            Icons.lock,
+                            color: Colors.black,
+                          ),
+                          suffix: InkWell(
+                            onTap: () {
+                              if (controller.dontShowPassword.value == true) {
+                                controller.dontShowPassword.value = false;
+                              } else {
+                                controller.dontShowPassword.value = true;
+                              }
+                            },
+                            child: Obx(() =>
+                                controller.dontShowPassword.value == true
+                                    ? Icon(Icons.remove_red_eye,
+                                        color: Colors.black)
+                                    : Icon(Icons.remove_red_eye_outlined,
+                                        color: Colors.black)),
+                          ),
+                          labelText: 'Password',
+                          labelStyle: TextStyle(
+                              fontSize:
+                                  sizer.font(fontsize: 12, context: context),
+                              color: Colors.black)),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -234,14 +253,24 @@ class ProviderUpdateProfile extends GetView<ProviderController> {
                           controller.check_if_account_exist(
                               context: context, originalimagefilename: image!);
                         },
-                        child: Text("Update Service Provider Account",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                    fontSize: sizer.font(
-                                        fontsize: 10, context: context))
-                                .copyWith(
+                        child: Obx(
+                          () => controller.isUpdating.value == true
+                              ? Center(
+                                  child: SpinKitThreeBounce(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
+                                    size: sizer.font(
+                                        fontsize: 10, context: context),
+                                  ),
+                                )
+                              : Text("Update Service Provider Account",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                          fontSize: sizer.font(
+                                              fontsize: 10, context: context))
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)),
+                        ),
                       ),
                     ),
                   ),

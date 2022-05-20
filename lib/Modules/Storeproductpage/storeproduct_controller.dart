@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:audiobuy/Helpers/sizer.dart';
 import 'package:audiobuy/Helpers/storage.dart';
 import 'package:audiobuy/Modules/Storeproductpage/storeproduct_api.dart';
 import 'package:audiobuy/Modules/Storeproductpage/storeproduct_model.dart';
@@ -15,12 +16,20 @@ class StoreProductController extends GetxController {
   RxString storecontanctno = ''.obs;
   TextEditingController searchTextField = TextEditingController();
   TextEditingController chatTextField = TextEditingController();
-
+  RxBool isCheckedCOD = true.obs;
+  RxBool isCheckedPickUp = false.obs;
+  RxBool hasUnvailableItem = false.obs;
   @override
   void onInit() async {
     storeid.value = await Get.arguments['storeid'];
-    get_store_Details(storeid: storeid.value);
-    start_stream_chat();
+    await get_store_Details(storeid: storeid.value);
+    await start_stream_chat();
+    searched_product.value = await Get.arguments['searched_product'];
+    if (searched_product.value != '/%no-product%/') {
+      searchTextField.text = searched_product.value;
+      searchProduct(stringtosearch: searched_product.value);
+    }
+
     super.onInit();
   }
 
@@ -31,6 +40,10 @@ class StoreProductController extends GetxController {
   RxBool isGettingStoreDetails = true.obs;
 
   RxBool hasMessageNotSeen = false.obs;
+  RxList<NotAvailableItemListModel> notAvailableItemsList =
+      <NotAvailableItemListModel>[].obs;
+  RxList<NotAvailableItemListModel> successfulOrdereditemList =
+      <NotAvailableItemListModel>[].obs;
 
   RxList<StoreDetails> storeDetails = <StoreDetails>[].obs;
 
@@ -38,6 +51,8 @@ class StoreProductController extends GetxController {
   RxList<Products> storeProducts_MasterList = <Products>[].obs;
   RxList<CartModel> cartList = <CartModel>[].obs;
   RxList<ChatModel> chats = <ChatModel>[].obs;
+  // ScrollController scroll_controller = ScrollController();
+  RxString searched_product = ''.obs;
 
   RxBool isPlacingOrder = false.obs;
 
@@ -49,7 +64,7 @@ class StoreProductController extends GetxController {
     storeaddress.value = storeDetails[0].address;
     storecontanctno.value = storeDetails[0].contactno;
     isGettingStoreDetails.value = false;
-    get_products_of_store(storeid: storeid);
+    await get_products_of_store(storeid: storeid);
   }
 
   get_products_of_store({required String storeid}) async {
@@ -101,7 +116,10 @@ class StoreProductController extends GetxController {
     cartList.assignAll(result);
   }
 
-  place_order({required BuildContext context}) async {
+  place_order({required BuildContext context, required Sizer sizer}) async {
+    notAvailableItemsList.clear();
+    successfulOrdereditemList.clear();
+    hasUnvailableItem(false);
     isPlacingOrder(true);
     DateTime dateandtime = new DateTime.now();
     var customerid = Get.find<StorageService>().box.read('userid');
@@ -112,11 +130,20 @@ class StoreProductController extends GetxController {
         datetime: dateandtime.toString());
 
     print(ordernumber);
-    insert_all_purchased_products(ordernumber: ordernumber, context: context);
+    insert_all_purchased_products(
+        ordernumber: ordernumber, context: context, sizer: sizer);
   }
 
   insert_all_purchased_products(
-      {required String ordernumber, required BuildContext context}) async {
+      {required String ordernumber,
+      required BuildContext context,
+      required Sizer sizer}) async {
+    String isDelivery = '';
+    if (isCheckedCOD.value == true) {
+      isDelivery = true.toString();
+    } else {
+      isDelivery = false.toString();
+    }
     for (var i = 0; i < cartList.length; i++) {
       await StoreProductApi.insert_ordered_products(
           productImage: cartList[i].productImage,
@@ -126,13 +153,20 @@ class StoreProductController extends GetxController {
           productName: cartList[i].productName,
           productID: cartList[i].productId,
           productQuantity: cartList[i].productQuantity.toString(),
+          isDelivery: isDelivery,
           ordernumber: ordernumber);
     }
-    Timer(Duration(seconds: 3), () {
-      isPlacingOrder(false);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Order Succesful!')));
-    });
+
+    isPlacingOrder(false);
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Order Succesful!')));
+    if (hasUnvailableItem.value == true) {
+      showCustomerMessage_Unvailable_Items(sizer: sizer, context: context);
+    } else {}
+    if (successfulOrdereditemList.isEmpty) {
+      await StoreProductApi.delete_ordernumber(ordernumber: ordernumber);
+    } else {}
+    hasUnvailableItem(false);
   }
 
   RxDouble count_checkout_total() {
@@ -146,10 +180,12 @@ class StoreProductController extends GetxController {
   }
 
   sendMessage() async {
+    var message = chatTextField.text.toString();
+    chatTextField.clear();
     var result = await StoreProductApi.send_chat(
         storeid: storeid.value,
         customerid: Get.find<StorageService>().box.read('userid').toString(),
-        message: chatTextField.text.toString());
+        message: message.toString());
     print(result);
     chatTextField.clear();
     update_seen_status();
@@ -180,7 +216,7 @@ class StoreProductController extends GetxController {
 
   start_stream_chat() {
     print("timer start");
-    chattimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    chattimer = Timer.periodic(Duration(seconds: 5), (timer) {
       getChat();
     });
   }
@@ -191,6 +227,19 @@ class StoreProductController extends GetxController {
       customerid: Get.find<StorageService>().box.read('userid').toString(),
     );
     print(result);
+  }
+
+  get_searched_products() {
+    var productname = 'YAMAHA CLASSICAL GUITAR';
+    var indexes = 0;
+    for (var i = 0; i < storeProducts.length; i++) {
+      if (storeProducts[i].productName.toLowerCase().toString() ==
+          productname.toLowerCase().toString()) {
+        indexes = i;
+      }
+    }
+    print(indexes);
+    // scroll_controller.jumpTo(double.parse(indexes.toString()));
   }
 
   // delete_Chats() async {
@@ -206,5 +255,147 @@ class StoreProductController extends GetxController {
     // delete_Chats();
     Get.back();
     print("timer stop");
+  }
+
+  showCustomerMessage_Unvailable_Items(
+      {required Sizer sizer, required BuildContext context}) {
+    Get.dialog(AlertDialog(
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Obx(
+            () => successfulOrdereditemList.isEmpty
+                ? SizedBox(
+                    height: sizer.height(height: 1, context: context),
+                  )
+                : Container(
+                    constraints: BoxConstraints(
+                      minHeight: sizer.height(height: 10, context: context),
+                      maxHeight: sizer.height(height: 30, context: context),
+                    ),
+                    width: sizer.width(width: 70, context: context),
+                    child: Column(
+                      children: [
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          width: sizer.width(width: 70, context: context),
+                          child: Text(
+                            "Successful Ordered Items",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: sizer.height(height: 2, context: context),
+                        ),
+                        Expanded(
+                          child: Container(
+                            alignment: Alignment.topLeft,
+                            width: sizer.width(width: 70, context: context),
+                            child: Obx(
+                              () => ListView.builder(
+                                // shrinkWrap: true,
+                                itemCount: successfulOrdereditemList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom: sizer.height(
+                                            height: 1, context: context)),
+                                    child: Container(
+                                      child: Text(
+                                        "● " +
+                                            successfulOrdereditemList[index]
+                                                .productName,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+          SizedBox(
+            height: sizer.height(height: 1, context: context),
+          ),
+          Obx(
+            () => notAvailableItemsList.isEmpty
+                ? SizedBox(
+                    height: sizer.height(height: 1, context: context),
+                  )
+                : Container(
+                    constraints: BoxConstraints(
+                      minHeight: sizer.height(height: 10, context: context),
+                      maxHeight: sizer.height(height: 30, context: context),
+                    ),
+                    width: sizer.width(width: 70, context: context),
+                    child: Column(
+                      children: [
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          width: sizer.width(width: 70, context: context),
+                          child: Text(
+                            "Unsuccessful Ordered Items",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.centerLeft,
+                          width: sizer.width(width: 70, context: context),
+                          child: Text(
+                            "Reason: Out of stocks.",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: sizer.height(height: 2, context: context),
+                        ),
+                        Expanded(
+                          child: Container(
+                            alignment: Alignment.topLeft,
+                            width: sizer.width(width: 70, context: context),
+                            child: Obx(
+                              () => ListView.builder(
+                                // shrinkWrap: true,
+                                itemCount: notAvailableItemsList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom: sizer.height(
+                                            height: 1, context: context)),
+                                    child: Container(
+                                      child: Text(
+                                        "● " +
+                                            notAvailableItemsList[index]
+                                                .productName,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    ));
   }
 }

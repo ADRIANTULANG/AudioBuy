@@ -64,7 +64,7 @@ class CustomerTrackRental extends GetView<CustomerController> {
                               controller.trackRental[index]
                                   .serviceRentalDateFrom.month
                                   .toString() +
-                              "to:" +
+                              " to:" +
                               controller
                                   .trackRental[index].serviceRentalDateTo.year
                                   .toString() +

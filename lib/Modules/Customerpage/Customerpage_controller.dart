@@ -7,6 +7,7 @@ import 'package:audiobuy/Modules/Customerpage/Customerpage_api.dart';
 import 'package:audiobuy/Modules/Customerpage/Customerpage_model.dart';
 import 'package:audiobuy/Modules/Login/Login_model.dart';
 import 'package:audiobuy/Modules/Login/Login_view.dart';
+import 'package:audiobuy/Modules/Storeproductpage/storeproduct_view.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -23,6 +24,8 @@ class CustomerController extends GetxController {
     super.onInit();
   }
 
+  RxBool dontShowPassword = true.obs;
+  RxBool isUpdating = false.obs;
   RxBool viewStorePage = true.obs;
 
   RxBool hasApprovedOrder = false.obs;
@@ -44,6 +47,7 @@ class CustomerController extends GetxController {
   RxBool isInfiniteScroll = true.obs;
 
   Timer? streamforApprovedOrders;
+  Timer? debounce;
 
   RxList<Users> usersList = <Users>[].obs;
   RxString name = ''.obs;
@@ -108,6 +112,7 @@ class CustomerController extends GetxController {
   check_if_account_exist(
       {required BuildContext context,
       required String originalimagefilename}) async {
+    isUpdating.value = true;
     var result = await HomepageApi.checkAccount(
         username: customernametext.text,
         password: customerpasswordtext.text,
@@ -120,9 +125,11 @@ class CustomerController extends GetxController {
     } else if (result == "Invalid") {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Account Already Exist!')));
+      isUpdating.value = false;
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error Contanct Developer!')));
+      isUpdating.value = false;
     }
   }
 
@@ -164,27 +171,28 @@ class CustomerController extends GetxController {
 
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Account Updated!')));
+    isUpdating.value = false;
     setData();
   }
 
   get_Data_Pending() async {
     var result = await HomepageApi.getDataPending();
-    trackOrderList.assignAll(result);
+    trackOrderList.assignAll(result.reversed);
   }
 
   get_Data_history() async {
     var result = await HomepageApi.getHistory();
-    historyList.assignAll(result);
+    historyList.assignAll(result.reversed);
   }
 
   get_rental_Data_Pending() async {
     var result = await HomepageApi.getRentalPending();
-    trackRental.assignAll(result);
+    trackRental.assignAll(result.reversed);
   }
 
   get_rental_Data_history() async {
     var result = await HomepageApi.getHistoryRental();
-    rentalHistory.assignAll(result);
+    rentalHistory.assignAll(result.reversed);
   }
 
   get_order_Details({required String ordernumber}) async {
@@ -223,10 +231,31 @@ class CustomerController extends GetxController {
   }
 
   stream_approved_orders() {
-    streamforApprovedOrders = Timer.periodic(Duration(seconds: 10), (timer) {
+    streamforApprovedOrders = Timer.periodic(Duration(seconds: 30), (timer) {
       count_approved_order();
       count_approved_services();
     });
+  }
+
+  get_searched_product(
+      {required String productName,
+      required Sizer sizer,
+      required BuildContext context}) async {
+    var result =
+        await HomepageApi.get_searched_product(productName: productName);
+    RxList<SearchedProductModel> productSearchList =
+        <SearchedProductModel>[].obs;
+    productSearchList.assignAll(result);
+    if (productSearchList.isEmpty) {
+      showCustomerNote_Product_Unvailable(sizer: sizer, context: context);
+    } else {
+      Get.to(() => StoreProductView(), arguments: {
+        'storeid': productSearchList[0].productStoreId,
+        'searched_product': productName,
+      });
+    }
+    // if(result.)
+    // orderhsitoryDetails.assignAll(result);
   }
 
   @override
@@ -353,5 +382,99 @@ class CustomerController extends GetxController {
       ),
       barrierDismissible: false,
     );
+  }
+
+  showCustomerNote(
+      {required Sizer sizer,
+      required BuildContext context,
+      required String note}) {
+    Get.dialog(AlertDialog(
+      content: Container(
+        height: sizer.height(height: 30, context: context),
+        width: sizer.width(width: 70, context: context),
+        // color: Colors.red,
+        child: Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: sizer.width(width: 70, context: context),
+              child: Text(
+                "Note",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: sizer.height(height: 2, context: context),
+            ),
+            Expanded(
+              child: Container(
+                alignment: Alignment.topLeft,
+                width: sizer.width(width: 70, context: context),
+                child: Text(
+                  note,
+                  style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: sizer.font(fontsize: 12, context: context)),
+                ),
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              width: sizer.width(width: 70, context: context),
+              child: Text(
+                "Note for store",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+  }
+
+  showCustomerNote_Product_Unvailable({
+    required Sizer sizer,
+    required BuildContext context,
+  }) {
+    Get.dialog(AlertDialog(
+      content: Container(
+        height: sizer.height(height: 8, context: context),
+        width: sizer.width(width: 70, context: context),
+        // color: Colors.red,
+        child: Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: sizer.width(width: 70, context: context),
+              child: Text(
+                "Message",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: sizer.height(height: 2, context: context),
+            ),
+            Expanded(
+              child: Container(
+                alignment: Alignment.center,
+                width: sizer.width(width: 70, context: context),
+                child: Text(
+                  "Sorry. Product Unavailable.",
+                  style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: sizer.font(fontsize: 14, context: context)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
   }
 }

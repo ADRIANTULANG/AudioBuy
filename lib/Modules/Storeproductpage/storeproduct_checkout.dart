@@ -90,9 +90,61 @@ class StoreProductsCheckoutView extends GetView<StoreProductController> {
               color: Colors.black,
             ),
             Expanded(child: SizedBox()),
+            Row(
+              children: [
+                Obx(
+                  () => Checkbox(
+                    value: controller.isCheckedCOD.value,
+                    onChanged: (value) {
+                      if (controller.isCheckedCOD.value == true) {
+                        controller.isCheckedCOD.value = false;
+                        controller.isCheckedPickUp.value = true;
+                      } else {
+                        controller.isCheckedCOD.value = true;
+                        controller.isCheckedPickUp.value = false;
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: sizer.width(width: 2, context: context),
+                ),
+                Text(
+                  "Cash on Delivery (COD)",
+                  style: sizer.style(
+                      context: context, fontsize: 12, color: Colors.black),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                Obx(
+                  () => Checkbox(
+                    value: controller.isCheckedPickUp.value,
+                    onChanged: (value) {
+                      if (controller.isCheckedPickUp.value == true) {
+                        controller.isCheckedPickUp.value = false;
+                        controller.isCheckedCOD.value = true;
+                      } else {
+                        controller.isCheckedPickUp.value = true;
+                        controller.isCheckedCOD.value = false;
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(
+                  width: sizer.width(width: 2, context: context),
+                ),
+                Text(
+                  "Pick up",
+                  style: sizer.style(
+                      context: context, fontsize: 12, color: Colors.black),
+                ),
+              ],
+            ),
             Padding(
               padding: EdgeInsets.only(
-                  left: sizer.width(width: 2, context: context),
+                  left: sizer.width(width: 4, context: context),
                   right: sizer.width(width: 2, context: context)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -100,7 +152,7 @@ class StoreProductsCheckoutView extends GetView<StoreProductController> {
                   Text(
                     "Total: ",
                     style: sizer.style(
-                        context: context, fontsize: 12, color: Colors.black),
+                        context: context, fontsize: 14, color: Colors.black),
                   ),
                   Text(
                     "₱ " +
@@ -109,7 +161,7 @@ class StoreProductsCheckoutView extends GetView<StoreProductController> {
                             .value
                             .toStringAsFixed(2),
                     style: sizer.style(
-                        context: context, fontsize: 12, color: Colors.black),
+                        context: context, fontsize: 14, color: Colors.black),
                   )
                 ],
               ),
@@ -141,7 +193,7 @@ class StoreProductsCheckoutView extends GetView<StoreProductController> {
                   minWidth: MediaQuery.of(context).size.width,
                   padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
                   onPressed: () {
-                    controller.place_order(context: context);
+                    controller.place_order(context: context, sizer: sizer);
                   },
                   child: Obx(
                     () => controller.isPlacingOrder.value == true

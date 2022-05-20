@@ -60,6 +60,26 @@ class StoreProductDetailsView extends GetView<StoreProductController> {
                     fontSize: sizer.font(fontsize: 15, context: context)),
               ),
             ),
+            Container(
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(
+                left: sizer.width(width: 2, context: context),
+                right: sizer.width(width: 2, context: context),
+              ),
+              child: Text(
+                controller.selectedProduct!.productCount == "1"
+                    ? "Stocks: " +
+                        controller.selectedProduct!.productCount +
+                        "pc."
+                    : "Stocks: " +
+                        controller.selectedProduct!.productCount +
+                        "pcs.",
+                style: TextStyle(
+                    color: Colors.black45,
+                    fontWeight: FontWeight.w700,
+                    fontSize: sizer.font(fontsize: 15, context: context)),
+              ),
+            ),
             SizedBox(
               height: sizer.height(height: 1, context: context),
             ),
@@ -125,7 +145,14 @@ class StoreProductDetailsView extends GetView<StoreProductController> {
                         color: Colors.black, shape: BoxShape.circle),
                     child: IconButton(
                       onPressed: () {
-                        controller.selectedProduct!.productQuantity.value++;
+                        if (int.parse(
+                                controller.selectedProduct!.productCount) <=
+                            controller.selectedProduct!.productQuantity.value) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Max quantity reached!')));
+                        } else {
+                          controller.selectedProduct!.productQuantity.value++;
+                        }
                       },
                       icon: Icon(
                         Icons.add,

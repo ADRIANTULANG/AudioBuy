@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:audiobuy/Constant/endpoints.dart';
+import 'package:audiobuy/Modules/Storeproductpage/storeproduct_controller.dart';
 import 'package:audiobuy/Modules/Storeproductpage/storeproduct_model.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 class StoreProductApi {
@@ -25,7 +27,7 @@ class StoreProductApi {
         var status = jsonDecode(response.body)['success'];
         if (status == true) {
           var result = jsonEncode(jsonDecode(response.body)['data']);
-          print(result);
+          // print(result);
           return StoreDetailsFromJson(result);
         } else {
           return [];
@@ -58,7 +60,7 @@ class StoreProductApi {
         var status = jsonDecode(response.body)['success'];
         if (status == true) {
           var result = jsonEncode(jsonDecode(response.body)['data']);
-          print(result);
+          // print(result);
           return productsFromJson(result);
         } else {
           return [];
@@ -89,7 +91,7 @@ class StoreProductApi {
       ).timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException("timeout");
       });
-      print(response.body);
+      // print(response.body);
       // print(json.encode(json.decode(response.body)));
       if (response.statusCode == 200) {
         var status = jsonDecode(response.body)['success'];
@@ -117,6 +119,7 @@ class StoreProductApi {
     required String productID,
     required String productQuantity,
     required String ordernumber,
+    required String isDelivery,
   }) async {
     try {
       var response = await http.post(
@@ -130,15 +133,41 @@ class StoreProductApi {
           'productID': productID,
           'productQuantity': productQuantity,
           'ordernumber': ordernumber,
+          'isDelivery': isDelivery
         },
       ).timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException("timeout");
       });
       print(response.body);
       // print(json.encode(json.decode(response.body)));
+
       if (response.statusCode == 200) {
         var status = jsonDecode(response.body)['success'];
         if (status == true) {
+          var message = jsonDecode(response.body)['message'];
+          if (message == 'Item not available') {
+            Get.find<StoreProductController>().hasUnvailableItem.value = true;
+            var itemName = jsonDecode(response.body)['productName'];
+            Get.find<StoreProductController>()
+                .notAvailableItemsList
+                .add(NotAvailableItemListModel(productName: itemName));
+          } else if (message == 'Item not available and available') {
+            var itemNameAvailable =
+                jsonDecode(response.body)['productNameAvailable'];
+            var itemNameUnavailable = jsonDecode(response.body)['productName'];
+            Get.find<StoreProductController>().hasUnvailableItem.value = true;
+            Get.find<StoreProductController>().notAvailableItemsList.add(
+                NotAvailableItemListModel(productName: itemNameUnavailable));
+            Get.find<StoreProductController>()
+                .successfulOrdereditemList
+                .add(NotAvailableItemListModel(productName: itemNameAvailable));
+          } else if (message == 'Success') {
+            var itemNameAvailable =
+                jsonDecode(response.body)['productNameAvailable'];
+            Get.find<StoreProductController>()
+                .successfulOrdereditemList
+                .add(NotAvailableItemListModel(productName: itemNameAvailable));
+          }
           return true;
         } else {
           return "error";
@@ -164,7 +193,7 @@ class StoreProductApi {
       ).timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException("timeout");
       });
-      print(response.body);
+      // print(response.body);
       // print(json.encode(json.decode(response.body)));
       if (response.statusCode == 200) {
         var status = jsonDecode(response.body)['success'];
@@ -278,6 +307,37 @@ class StoreProductApi {
       }
     } catch (error) {
       print('delete_chats catch error $error');
+      return Future.error(true);
+    }
+  }
+
+  static Future delete_ordernumber({
+    required String ordernumber,
+  }) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/delete-transaction-unsuccessful-order.php"),
+        body: {
+          'ordernumber': ordernumber,
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          // var result =
+          //     chatModelFromJson(jsonEncode(jsonDecode(response.body)['data']));
+          // return result;
+        } else {
+          return "error";
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('delete_ordernumber catch error $error');
       return Future.error(true);
     }
   }

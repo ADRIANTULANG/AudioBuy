@@ -64,7 +64,7 @@ class CustomerRentalHistory extends GetView<CustomerController> {
                               controller.rentalHistory[index]
                                   .serviceRentalDateFrom.month
                                   .toString() +
-                              "to:" +
+                              " to:" +
                               controller
                                   .rentalHistory[index].serviceRentalDateTo.year
                                   .toString() +

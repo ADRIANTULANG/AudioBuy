@@ -406,4 +406,33 @@ class HomepageApi {
       return Future.error(true);
     }
   }
+
+  static Future<List<SearchedProductModel>> get_searched_product(
+      {required String productName}) async {
+    try {
+      var response = await http.post(
+        Uri.parse("$endPoint/get-search-product.php"),
+        body: {'productName': productName},
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw TimeoutException("timeout");
+      });
+      // print(response.body);
+      // print(json.encode(json.decode(response.body)));
+      if (response.statusCode == 200) {
+        var status = jsonDecode(response.body)['success'];
+        if (status == true) {
+          var result = jsonEncode(jsonDecode(response.body)['data']);
+
+          return searchedProductModelFromJson(result);
+        } else {
+          return [];
+        }
+      } else {
+        return Future.error(true);
+      }
+    } catch (error) {
+      print('get_searched_product catch error $error');
+      return Future.error(true);
+    }
+  }
 }

@@ -285,6 +285,10 @@ class StorePageView extends GetView<StorepageController> {
                                                 image: controller
                                                     .productList[index]
                                                     .productImage,
+                                                count: int.parse(controller
+                                                        .productList[index]
+                                                        .productCount)
+                                                    .obs,
                                               ));
                                         });
                                       },
@@ -297,23 +301,61 @@ class StorePageView extends GetView<StorepageController> {
                                       value: 2,
                                     )
                                   ],
-                                  child: Container(
-                                    width: sizer.width(
-                                        width: 30, context: context),
-                                    height: sizer.height(
-                                        height: 14, context: context),
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            fit: BoxFit.cover,
-                                            image: controller.productList[index]
-                                                        .productImage !=
-                                                    'no-image.jpg'
-                                                ? NetworkImage(
-                                                    '$imageEndpoint${controller.productList[index].productImage}')
-                                                : NetworkImage(
-                                                    "$imageEndpoint/no-image.jpg")),
-                                        borderRadius:
-                                            BorderRadius.circular(15)),
+                                  child: Stack(
+                                    children: [
+                                      Container(
+                                        width: sizer.width(
+                                            width: 30, context: context),
+                                        height: sizer.height(
+                                            height: 14, context: context),
+                                        decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                                fit: BoxFit.cover,
+                                                image: controller
+                                                            .productList[index]
+                                                            .productImage !=
+                                                        'no-image.jpg'
+                                                    ? NetworkImage(
+                                                        '$imageEndpoint${controller.productList[index].productImage}')
+                                                    : NetworkImage(
+                                                        "$imageEndpoint/no-image.jpg")),
+                                            borderRadius:
+                                                BorderRadius.circular(15)),
+                                      ),
+                                      Positioned(
+                                          top: sizer.height(
+                                              height: .7, context: context),
+                                          right: sizer.width(
+                                              width: 1.5, context: context),
+                                          child: Container(
+                                            padding: EdgeInsets.only(
+                                                right: sizer.width(
+                                                    width: 2, context: context),
+                                                top: sizer.height(
+                                                    height: .5,
+                                                    context: context),
+                                                bottom: sizer.height(
+                                                    height: .5,
+                                                    context: context),
+                                                left: sizer.width(
+                                                    width: 2,
+                                                    context: context)),
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                                color: Colors.grey[700]),
+                                            child: Text(
+                                              controller.productList[index]
+                                                  .productCount,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                  fontSize: sizer.font(
+                                                      fontsize: 9,
+                                                      context: context)),
+                                            ),
+                                          ))
+                                    ],
                                   ),
                                 ),
                                 SizedBox(

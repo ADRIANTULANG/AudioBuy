@@ -286,7 +286,7 @@ class StoreProductView extends GetView<StoreProductController> {
                                                                           .circular(
                                                                               3),
                                                                   color: Colors
-                                                                      .white),
+                                                                      .black45),
                                                               alignment:
                                                                   Alignment
                                                                       .center,
@@ -340,6 +340,35 @@ class StoreProductView extends GetView<StoreProductController> {
                                                           .storeProducts[index]
                                                           .productPrice)
                                                       .toStringAsFixed(2),
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: sizer.font(
+                                                      fontsize: 9,
+                                                      context: context)),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.only(
+                                              left: sizer.width(
+                                                  width: 1, context: context),
+                                            ),
+                                            width: sizer.width(
+                                                width: 100, context: context),
+                                            child: Text(
+                                              controller.storeProducts[index]
+                                                          .productCount ==
+                                                      "1"
+                                                  ? "Stocks: " +
+                                                      controller
+                                                          .storeProducts[index]
+                                                          .productCount +
+                                                      "-pc."
+                                                  : "Stocks: " +
+                                                      controller
+                                                          .storeProducts[index]
+                                                          .productCount +
+                                                      "-pcs.",
                                               style: TextStyle(
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: sizer.font(

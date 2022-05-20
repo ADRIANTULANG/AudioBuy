@@ -23,6 +23,20 @@ class StoreForApprovalDetails extends GetView<StorepageController> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        // actions: [
+        //   InkWell(
+        //     onTap: (){
+        //       controller.showCustomerNote(sizer: sizer, context: context, note: note)
+        //     },
+        //     child: Icon(
+        //       Icons.list_alt,
+        //       size: sizer.font(fontsize: 30, context: context),
+        //     ),
+        //   ),
+        //   SizedBox(
+        //     width: sizer.width(width: 4, context: context),
+        //   )
+        // ],
       ),
       body: Container(
         height: sizer.height(height: 100, context: context),

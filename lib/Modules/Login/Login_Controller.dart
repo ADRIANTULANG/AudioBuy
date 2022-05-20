@@ -21,6 +21,7 @@ class LoginController extends GetxController {
   RxBool isLoadingLogin = false.obs;
 
   login({required BuildContext context}) async {
+    isLoadingLogin.value = true;
     var result =
         await LoginApi.login(username: username.text, password: password.text);
     usersList.assignAll(result);
@@ -35,13 +36,17 @@ class LoginController extends GetxController {
           address: usersList[0].address,
           usertype: usersList[0].usertype);
       if (usersList[0].usertype == "customer") {
+        isLoadingLogin.value = false;
         Get.offAll(() => CustomerView());
       } else if (usersList[0].usertype == "store") {
+        isLoadingLogin.value = false;
         Get.offAll(() => StorePageView());
       } else if (usersList[0].usertype == "provider") {
+        isLoadingLogin.value = false;
         Get.offAll(() => ProviderPageView());
       }
     } else {
+      isLoadingLogin.value = false;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('User did not exist!')));
     }

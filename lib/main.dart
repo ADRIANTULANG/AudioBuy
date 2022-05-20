@@ -1,5 +1,6 @@
 import 'package:audiobuy/Helpers/storage.dart';
 import 'package:audiobuy/Modules/SplashScreen/SplashScreen_view.dart';
+// import 'package:audiobuy/Modules/sample.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -7,7 +8,6 @@ import 'package:get_storage/get_storage.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-
   await Get.put(StorageService());
   runApp(const MyApp());
 }
@@ -15,7 +15,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -25,6 +24,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: SplashScreen(),
+      // home: Sample(),
     );
   }
 }

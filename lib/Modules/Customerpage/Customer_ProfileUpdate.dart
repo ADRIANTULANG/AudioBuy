@@ -1,7 +1,7 @@
 import 'package:audiobuy/Constant/endpoints.dart';
 import 'package:audiobuy/Helpers/sizer.dart';
 import 'package:audiobuy/Modules/Customerpage/Customerpage_controller.dart';
-
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
@@ -110,7 +110,7 @@ class CustomerProfileUpdate extends GetView<CustomerController> {
                           Icons.label,
                           color: Colors.black,
                         ),
-                        labelText: 'Store Name',
+                        labelText: 'Name',
                         labelStyle: TextStyle(
                             fontSize:
                                 sizer.font(fontsize: 12, context: context),
@@ -131,7 +131,7 @@ class CustomerProfileUpdate extends GetView<CustomerController> {
                           Icons.location_pin,
                           color: Colors.black,
                         ),
-                        labelText: 'Store Address',
+                        labelText: 'Address',
                         labelStyle: TextStyle(
                             fontSize:
                                 sizer.font(fontsize: 12, context: context),
@@ -152,7 +152,7 @@ class CustomerProfileUpdate extends GetView<CustomerController> {
                           Icons.email,
                           color: Colors.black,
                         ),
-                        labelText: 'User Name',
+                        labelText: 'Username',
                         labelStyle: TextStyle(
                             fontSize:
                                 sizer.font(fontsize: 12, context: context),
@@ -166,18 +166,41 @@ class CustomerProfileUpdate extends GetView<CustomerController> {
                   padding: EdgeInsets.only(
                       left: sizer.width(width: 4, context: context),
                       right: sizer.width(width: 4, context: context)),
-                  child: TextField(
-                    controller: controller.customerpasswordtext,
-                    decoration: InputDecoration(
-                        prefix: Icon(
-                          Icons.lock,
-                          color: Colors.black,
-                        ),
-                        labelText: 'Password',
-                        labelStyle: TextStyle(
-                            fontSize:
-                                sizer.font(fontsize: 12, context: context),
-                            color: Colors.black)),
+                  child: Obx(
+                    () => TextField(
+                      controller: controller.customerpasswordtext,
+                      obscureText: controller.dontShowPassword.value,
+                      decoration: InputDecoration(
+                          prefix: Icon(
+                            Icons.lock,
+                            color: Colors.black,
+                          ),
+                          labelText: 'Password',
+                          suffix: InkWell(
+                            onTap: () {
+                              if (controller.dontShowPassword.value == true) {
+                                controller.dontShowPassword.value = false;
+                              } else {
+                                controller.dontShowPassword.value = true;
+                              }
+                            },
+                            child: Obx(
+                              () => controller.dontShowPassword.value == true
+                                  ? Icon(
+                                      Icons.remove_red_eye,
+                                      color: Colors.black,
+                                    )
+                                  : Icon(
+                                      Icons.remove_red_eye_outlined,
+                                      color: Colors.black,
+                                    ),
+                            ),
+                          ),
+                          labelStyle: TextStyle(
+                              fontSize:
+                                  sizer.font(fontsize: 12, context: context),
+                              color: Colors.black)),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -235,14 +258,24 @@ class CustomerProfileUpdate extends GetView<CustomerController> {
                           controller.check_if_account_exist(
                               context: context, originalimagefilename: image!);
                         },
-                        child: Text("Update Account",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                    fontSize: sizer.font(
-                                        fontsize: 10, context: context))
-                                .copyWith(
+                        child: Obx(
+                          () => controller.isUpdating.value == true
+                              ? Center(
+                                  child: SpinKitThreeBounce(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold)),
+                                    size: sizer.font(
+                                        fontsize: 10, context: context),
+                                  ),
+                                )
+                              : Text("Update Account",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                          fontSize: sizer.font(
+                                              fontsize: 10, context: context))
+                                      .copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)),
+                        ),
                       ),
                     ),
                   ),

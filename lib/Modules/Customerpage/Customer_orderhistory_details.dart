@@ -42,15 +42,48 @@ class CustomerOrderHistoryDetails extends GetView<CustomerController> {
                         width: sizer.width(width: 100, context: context),
                         child: Row(
                           children: [
-                            Container(
-                              height:
-                                  sizer.height(height: 13, context: context),
-                              width: sizer.width(width: 30, context: context),
-                              decoration: BoxDecoration(
-                                  image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: NetworkImage(
-                                          '$imageEndpoint/${controller.orderhsitoryDetails[index].productImage}'))),
+                            Stack(
+                              alignment: Alignment.topRight,
+                              children: [
+                                Container(
+                                  height: sizer.height(
+                                      height: 13, context: context),
+                                  width:
+                                      sizer.width(width: 30, context: context),
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(
+                                              '$imageEndpoint/${controller.orderhsitoryDetails[index].productImage}'))),
+                                ),
+                                Positioned(
+                                  top: sizer.height(
+                                      height: .5, context: context),
+                                  right:
+                                      sizer.width(width: 1, context: context),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(5)),
+                                    padding: EdgeInsets.only(
+                                        top: sizer.height(
+                                            height: .5, context: context),
+                                        bottom: sizer.height(
+                                            height: .5, context: context),
+                                        left: sizer.width(
+                                            width: 2, context: context),
+                                        right: sizer.width(
+                                            width: 2, context: context)),
+                                    child: Text(
+                                      controller.orderhsitoryDetails[index]
+                                          .productQuantity
+                                          .toString(),
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                )
+                              ],
                             ),
                             Expanded(
                                 child: Container(
@@ -104,10 +137,12 @@ class CustomerOrderHistoryDetails extends GetView<CustomerController> {
                     style: sizer.style(
                         context: context, fontsize: 12, color: Colors.black),
                   ),
-                  Text(
-                    "₱ " + controller.countTotal().value,
-                    style: sizer.style(
-                        context: context, fontsize: 12, color: Colors.black),
+                  Obx(
+                    () => Text(
+                      "₱ " + controller.countTotal().value,
+                      style: sizer.style(
+                          context: context, fontsize: 12, color: Colors.black),
+                    ),
                   )
                 ],
               ),

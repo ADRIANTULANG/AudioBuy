@@ -49,8 +49,12 @@ class StorepageController extends GetxController {
   RxString contanctofstore = ''.obs;
 
   RxBool hasApprovedOrder = false.obs;
+  RxBool isLoadingCreateProduct = false.obs;
+  RxBool isLoadingUpdatingProduct = false.obs;
   RxInt pendingCount = 0.obs;
-
+  RxInt initialQuantity = 1.obs;
+  RxBool dontShowPassword = true.obs;
+  RxBool isUpdating = false.obs;
   Timer? streamforApprovedOrders;
 
   Timer? chattimer;
@@ -106,6 +110,7 @@ class StorepageController extends GetxController {
   }
 
   check_if_productExist({required BuildContext context}) async {
+    isLoadingCreateProduct.value = true;
     var result = await StoreApi.checkProduct(productname: productname.text);
     if (result == "Valid") {
       ceate_prodducts(context: context);
@@ -116,11 +121,13 @@ class StorepageController extends GetxController {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error contact developer!')));
     } else {}
+    isLoadingCreateProduct.value = false;
   }
 
   check_if_account_exist(
       {required BuildContext context,
       required String originalimagefilename}) async {
+    isUpdating.value = true;
     var result = await StoreApi.checkAccount(
         username: storeusername.text,
         password: storepassword.text,
@@ -133,14 +140,17 @@ class StorepageController extends GetxController {
     } else if (result == "Invalid") {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Account Already Exist!')));
+      isUpdating.value = false;
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error Contanct Developer!')));
+      isUpdating.value = false;
     }
   }
 
   ceate_prodducts({required BuildContext context}) async {
     var result = await StoreApi.create_products(
+        productCount: initialQuantity.toString(),
         productname: productname.text,
         productPrice: productPrice.text,
         ProductDescription: productDescription.text,
@@ -161,9 +171,12 @@ class StorepageController extends GetxController {
 
   update_product(
       {required String productID,
+      required String count,
       required BuildContext context,
       required String originalfilename}) async {
+    isLoadingUpdatingProduct.value = true;
     var result = await StoreApi.update_product(
+        productCount: count,
         productname: productname.text,
         productPrice: productPrice.text,
         productDescription: productDescription.text,
@@ -178,6 +191,7 @@ class StorepageController extends GetxController {
           imagefile: productimage!);
     }
     get_products();
+    isLoadingUpdatingProduct.value = false;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Product Updated!')));
   }
@@ -219,11 +233,12 @@ class StorepageController extends GetxController {
     setData();
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Account Updated!')));
+    isUpdating.value = false;
   }
 
   get_orders_of_Stores() async {
     var result = await StoreApi.get_store_orders();
-    orderForApprovalList.assignAll(result);
+    orderForApprovalList.assignAll(result.reversed);
   }
 
   get_order_details({required String transactionID}) async {
@@ -258,7 +273,7 @@ class StorepageController extends GetxController {
   }
 
   stream_approved_orders() {
-    streamforApprovedOrders = Timer.periodic(Duration(seconds: 10), (timer) {
+    streamforApprovedOrders = Timer.periodic(Duration(seconds: 30), (timer) {
       count_approved_order();
       get_chats_of_users();
       count_Chats();
@@ -398,10 +413,12 @@ class StorepageController extends GetxController {
   }
 
   sendMessage({required String customerid}) async {
+    var message = chatTextField.text.toString();
+    chatTextField.clear();
     var result = await StoreApi.send_chats(
         storeid: Get.find<StorageService>().box.read('userid').toString(),
         customerid: customerid,
-        message: chatTextField.text.toString());
+        message: message.toString());
     print(result);
     chatTextField.clear();
     update_seen_status(customerid: customerid);
@@ -432,7 +449,7 @@ class StorepageController extends GetxController {
 
   start_stream_chat({required String customerid}) {
     print("timer start");
-    chattimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    chattimer = Timer.periodic(Duration(seconds: 5), (timer) {
       getChat(customerid: customerid);
     });
   }

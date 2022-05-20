@@ -66,6 +66,7 @@ class Products {
     required this.productDescription,
     required this.productStoreId,
     required this.productImage,
+    required this.productCount,
     required this.productQuantity,
   });
 
@@ -75,6 +76,7 @@ class Products {
   String productDescription;
   String productStoreId;
   String productImage;
+  String productCount;
   RxInt productQuantity;
 
   factory Products.fromJson(Map<String, dynamic> json) => Products(
@@ -84,6 +86,7 @@ class Products {
         productPrice: json["productPrice"],
         productDescription: json["ProductDescription"],
         productStoreId: json["productStoreID"],
+        productCount: json["productCount"],
         productImage: json["productImage"],
       );
 
@@ -94,6 +97,7 @@ class Products {
         "productPrice": productPrice,
         "ProductDescription": productDescription,
         "productStoreID": productStoreId,
+        "productCount": productCount,
         "productImage": productImage,
       };
 }
@@ -183,5 +187,29 @@ class ChatModel {
         "receiver": receiver,
         "seen": seen,
         "date": date.toIso8601String(),
+      };
+}
+
+List<NotAvailableItemListModel> notAvailableItemListModelFromJson(String str) =>
+    List<NotAvailableItemListModel>.from(
+        json.decode(str).map((x) => NotAvailableItemListModel.fromJson(x)));
+
+String notAvailableItemListModelToJson(List<NotAvailableItemListModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class NotAvailableItemListModel {
+  NotAvailableItemListModel({
+    required this.productName,
+  });
+
+  String productName;
+
+  factory NotAvailableItemListModel.fromJson(Map<String, dynamic> json) =>
+      NotAvailableItemListModel(
+        productName: json["productName"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "productName": productName,
       };
 }

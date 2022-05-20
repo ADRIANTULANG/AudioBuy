@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audiobuy/Constant/endpoints.dart';
 import 'package:audiobuy/Helpers/sizer.dart';
 
@@ -57,16 +59,33 @@ class StoreView extends GetView<CustomerController> {
                     obscureText: false,
                     controller: controller.searchController,
                     onChanged: (value) {
-                      if (controller.searchController.text.isEmpty) {
-                        print("daan here dont search");
-                        controller.isInfiniteScroll.value = true;
-                        controller.storeList
-                            .assignAll(controller.storeListMasterList);
-                      } else {
-                        print("daan here search");
-                        controller.searchFunctionNew(
-                            stringtosearch: controller.searchController.text);
-                      }
+                      if (controller.debounce?.isActive ?? false)
+                        controller.debounce?.cancel();
+                      controller.debounce =
+                          Timer(const Duration(milliseconds: 800), () async {
+                        if (controller.searchController.text == "") {
+                          FocusScope.of(context).unfocus();
+                        } else {
+                          await controller.get_searched_product(
+                              context: context,
+                              sizer: sizer,
+                              productName:
+                                  controller.searchController.text.toString());
+                          FocusScope.of(context).unfocus();
+                          controller.searchController.clear();
+                        }
+                      });
+
+                      // if (controller.searchController.text.isEmpty) {
+                      //   print("daan here dont search");
+                      //   controller.isInfiniteScroll.value = true;
+                      //   controller.storeList
+                      //       .assignAll(controller.storeListMasterList);
+                      // } else {
+                      //   print("daan here search");
+                      //   controller.searchFunctionNew(
+                      //       stringtosearch: controller.searchController.text);
+                      // }
                     },
                     style: TextStyle(
                         fontSize: sizer.font(fontsize: 10, context: context)),
@@ -155,8 +174,10 @@ class StoreView extends GetView<CustomerController> {
                   builder: (BuildContext context) {
                     return GestureDetector(
                       onTap: () {
-                        Get.to(() => StoreProductView(),
-                            arguments: {'storeid': i.userid});
+                        Get.to(() => StoreProductView(), arguments: {
+                          'storeid': i.userid,
+                          'searched_product': '/%no-product%/'
+                        });
                       },
                       child: Container(
                         width: MediaQuery.of(context).size.width,

@@ -35,12 +35,29 @@ class CustomerRentalHistoryDetails extends GetView<CustomerController> {
             Padding(
               padding: EdgeInsets.only(
                 left: sizer.width(width: 2, context: context),
-                right: sizer.width(width: 2, context: context),
+                right: sizer.width(width: 4, context: context),
               ),
-              child: Text(
-                servicesDetails!.serviceName,
-                style: sizer.style(
-                    context: context, fontsize: 18, color: Colors.black),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    servicesDetails!.serviceName,
+                    style: sizer.style(
+                        context: context, fontsize: 18, color: Colors.black),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      controller.showCustomerNote(
+                          sizer: sizer,
+                          context: context,
+                          note: servicesDetails!.note);
+                    },
+                    child: Icon(
+                      Icons.list_alt,
+                      size: sizer.font(fontsize: 30, context: context),
+                    ),
+                  )
+                ],
               ),
             ),
             Padding(

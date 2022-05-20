@@ -22,7 +22,16 @@ class LoginApi {
         throw TimeoutException("timeout");
       });
 
-      // print(json.encode(json.decode(response.body)));
+      print(response.body);
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      print(response.bodyBytes);
+      print(response.contentLength);
+      print(response.headers);
+      print(response.isRedirect);
+      print(response.persistentConnection);
+      print(response.request);
+      print(response.request);
       if (response.statusCode == 200) {
         var status = jsonDecode(response.body)['success'];
         if (status == true) {

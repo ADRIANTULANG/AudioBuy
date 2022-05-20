@@ -223,3 +223,47 @@ class OrderHistoryDetails {
         "productQuantity": productQuantity,
       };
 }
+
+List<SearchedProductModel> searchedProductModelFromJson(String str) =>
+    List<SearchedProductModel>.from(
+        json.decode(str).map((x) => SearchedProductModel.fromJson(x)));
+
+String searchedProductModelToJson(List<SearchedProductModel> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+
+class SearchedProductModel {
+  SearchedProductModel({
+    required this.productId,
+    required this.productName,
+    required this.productPrice,
+    required this.productDescription,
+    required this.productStoreId,
+    required this.productImage,
+  });
+
+  String productId;
+  String productName;
+  String productPrice;
+  String productDescription;
+  String productStoreId;
+  String productImage;
+
+  factory SearchedProductModel.fromJson(Map<String, dynamic> json) =>
+      SearchedProductModel(
+        productId: json["productID"],
+        productName: json["productName"],
+        productPrice: json["productPrice"],
+        productDescription: json["ProductDescription"],
+        productStoreId: json["productStoreID"],
+        productImage: json["productImage"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "productID": productId,
+        "productName": productName,
+        "productPrice": productPrice,
+        "ProductDescription": productDescription,
+        "productStoreID": productStoreId,
+        "productImage": productImage,
+      };
+}

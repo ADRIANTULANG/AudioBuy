@@ -131,7 +131,7 @@ class ServicesController extends GetxController {
 
   start_stream_chat() {
     print("timer start");
-    chattimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    chattimer = Timer.periodic(Duration(seconds: 5), (timer) {
       getChat();
     });
   }

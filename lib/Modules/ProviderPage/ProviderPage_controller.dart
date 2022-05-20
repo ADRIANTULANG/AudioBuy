@@ -35,6 +35,7 @@ class ProviderController extends GetxController {
 
   TextEditingController chatTextField = TextEditingController();
   RxBool hasMessageNotSeen = false.obs;
+  RxBool isUpdating = false.obs;
 
   setData() {
     providerImage.value = Get.find<StorageService>().box.read('image');
@@ -63,6 +64,7 @@ class ProviderController extends GetxController {
       <ServicesForApproval>[].obs;
 
   RxBool hasApprovedServices = false.obs;
+  RxBool dontShowPassword = true.obs;
   RxInt countPeding = 0.obs;
   Timer? streamforApprovedOrders;
 
@@ -143,6 +145,7 @@ class ProviderController extends GetxController {
   check_if_account_exist(
       {required BuildContext context,
       required String originalimagefilename}) async {
+    isUpdating.value = true;
     var result = await ProviderApi.checkAccount(
         username: providerusernametext.text,
         password: providerpasswordtext.text,
@@ -155,9 +158,11 @@ class ProviderController extends GetxController {
     } else if (result == "Invalid") {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Account Already Exist!')));
+      isUpdating.value = false;
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error Contanct Developer!')));
+      isUpdating.value = false;
     }
   }
 
@@ -199,12 +204,13 @@ class ProviderController extends GetxController {
     setData();
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Account Updated!')));
+    isUpdating.value = false;
   }
 
   get_services_rental_for_approval() async {
     var result = await ProviderApi.get_services_for_approval(
         providerid: Get.find<StorageService>().box.read('userid'));
-    serviceForApprovalList.assignAll(result);
+    serviceForApprovalList.assignAll(result.reversed);
   }
 
   approved_or_cancel(
@@ -233,7 +239,7 @@ class ProviderController extends GetxController {
   }
 
   stream_approved_orders() {
-    streamforApprovedOrders = Timer.periodic(Duration(seconds: 10), (timer) {
+    streamforApprovedOrders = Timer.periodic(Duration(seconds: 30), (timer) {
       count_approved_services();
       get_chats_of_users();
       count_Chats();
@@ -373,10 +379,12 @@ class ProviderController extends GetxController {
   }
 
   sendMessage({required String customerid}) async {
+    var message = chatTextField.text.toString();
+    chatTextField.clear();
     var result = await StoreApi.send_chats(
         storeid: Get.find<StorageService>().box.read('userid').toString(),
         customerid: customerid,
-        message: chatTextField.text.toString());
+        message: message.toString());
     print(result);
     chatTextField.clear();
     update_seen_status(customerid: customerid);
@@ -407,7 +415,7 @@ class ProviderController extends GetxController {
 
   start_stream_chat({required String customerid}) {
     print("timer start");
-    chattimer = Timer.periodic(Duration(seconds: 3), (timer) {
+    chattimer = Timer.periodic(Duration(seconds: 5), (timer) {
       getChat(customerid: customerid);
     });
   }
@@ -437,5 +445,57 @@ class ProviderController extends GetxController {
     // delete_Chats();
     Get.back();
     print("timer stop");
+  }
+
+  showCustomerNote(
+      {required Sizer sizer,
+      required BuildContext context,
+      required String note}) {
+    Get.dialog(AlertDialog(
+      content: Container(
+        height: sizer.height(height: 30, context: context),
+        width: sizer.width(width: 70, context: context),
+        // color: Colors.red,
+        child: Column(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: sizer.width(width: 70, context: context),
+              child: Text(
+                "Note",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: sizer.height(height: 2, context: context),
+            ),
+            Expanded(
+              child: Container(
+                alignment: Alignment.topLeft,
+                width: sizer.width(width: 70, context: context),
+                child: Text(
+                  note,
+                  style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      fontSize: sizer.font(fontsize: 12, context: context)),
+                ),
+              ),
+            ),
+            Container(
+              alignment: Alignment.centerLeft,
+              width: sizer.width(width: 70, context: context),
+              child: Text(
+                "From: Customer",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
   }
 }
