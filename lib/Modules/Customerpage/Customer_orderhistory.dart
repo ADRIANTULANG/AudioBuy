@@ -37,6 +37,8 @@ class CustomerOrderHistory extends GetView<CustomerController> {
                     controller.get_order_Details(
                         ordernumber: controller.historyList[index].ordernumber);
                     Get.to(() => CustomerOrderHistoryDetails(
+                        orderStatus: controller.historyList[index].status,
+                        isDelivery: controller.historyList[index].isDelivery,
                         ordernumber:
                             controller.historyList[index].ordernumber));
                   },

@@ -5,6 +5,7 @@ import 'package:audiobuy/Helpers/sizer.dart';
 import 'package:audiobuy/Helpers/storage.dart';
 import 'package:audiobuy/Modules/Storeproductpage/storeproduct_api.dart';
 import 'package:audiobuy/Modules/Storeproductpage/storeproduct_model.dart';
+import 'package:audiobuy/Modules/SuccessfulAndUnsuccesfulOrder/UnsuccessfulAndSuccess_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -19,6 +20,7 @@ class StoreProductController extends GetxController {
   RxBool isCheckedCOD = true.obs;
   RxBool isCheckedPickUp = false.obs;
   RxBool hasUnvailableItem = false.obs;
+  RxBool isRegisteredProductDetails = false.obs;
   @override
   void onInit() async {
     storeid.value = await Get.arguments['storeid'];
@@ -38,7 +40,7 @@ class StoreProductController extends GetxController {
   Products? selectedProduct;
 
   RxBool isGettingStoreDetails = true.obs;
-
+  RxBool isGettingStoreProducts = true.obs;
   RxBool hasMessageNotSeen = false.obs;
   RxList<NotAvailableItemListModel> notAvailableItemsList =
       <NotAvailableItemListModel>[].obs;
@@ -71,6 +73,7 @@ class StoreProductController extends GetxController {
     var result = await StoreProductApi.getProducts(storeid: storeid);
     storeProducts.assignAll(result);
     storeProducts_MasterList.assignAll(result);
+    isGettingStoreProducts(false);
   }
 
   searchProduct({required String stringtosearch}) {
@@ -121,9 +124,16 @@ class StoreProductController extends GetxController {
     successfulOrdereditemList.clear();
     hasUnvailableItem(false);
     isPlacingOrder(true);
+    String isDelivery = '';
+    if (isCheckedCOD.value == true) {
+      isDelivery = true.toString();
+    } else {
+      isDelivery = false.toString();
+    }
     DateTime dateandtime = new DateTime.now();
     var customerid = Get.find<StorageService>().box.read('userid');
     var ordernumber = await StoreProductApi.create_order(
+        isDelivery: isDelivery,
         storeid: storeid.value,
         contactno: Get.find<StorageService>().box.read('contactno'),
         customerid: customerid.toString(),
@@ -161,11 +171,20 @@ class StoreProductController extends GetxController {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Order Succesful!')));
     if (hasUnvailableItem.value == true) {
-      showCustomerMessage_Unvailable_Items(sizer: sizer, context: context);
-    } else {}
+      // showCustomerMessage_Unvailable_Items(sizer: sizer, context: context);
+      Get.to(() => UnsuccessfulAndSuccessfulView());
+    } else {
+      if (isRegisteredProductDetails.value == true) {
+        Get.back();
+        Get.back();
+      } else {
+        Get.back();
+      }
+    }
     if (successfulOrdereditemList.isEmpty) {
       await StoreProductApi.delete_ordernumber(ordernumber: ordernumber);
     } else {}
+    await get_products_of_store(storeid: storeid.value);
     hasUnvailableItem(false);
   }
 
@@ -211,7 +230,7 @@ class StoreProductController extends GetxController {
     } else {
       hasMessageNotSeen.value = false;
     }
-    print(result);
+    // print(result);
   }
 
   start_stream_chat() {
@@ -250,6 +269,11 @@ class StoreProductController extends GetxController {
   //   print(result);
   // }
 
+  getback() {
+    isRegisteredProductDetails.value = false;
+    Get.back();
+  }
+
   stopStream() {
     chattimer!.cancel();
     // delete_Chats();
@@ -259,143 +283,148 @@ class StoreProductController extends GetxController {
 
   showCustomerMessage_Unvailable_Items(
       {required Sizer sizer, required BuildContext context}) {
-    Get.dialog(AlertDialog(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Obx(
-            () => successfulOrdereditemList.isEmpty
-                ? SizedBox(
-                    height: sizer.height(height: 1, context: context),
-                  )
-                : Container(
-                    constraints: BoxConstraints(
-                      minHeight: sizer.height(height: 10, context: context),
-                      maxHeight: sizer.height(height: 30, context: context),
-                    ),
-                    width: sizer.width(width: 70, context: context),
-                    child: Column(
-                      children: [
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: sizer.width(width: 70, context: context),
-                          child: Text(
-                            "Successful Ordered Items",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: sizer.height(height: 2, context: context),
-                        ),
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.topLeft,
+    Get.dialog(
+      AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Obx(
+              () => successfulOrdereditemList.isEmpty
+                  ? SizedBox(
+                      height: sizer.height(height: 1, context: context),
+                    )
+                  : Container(
+                      constraints: BoxConstraints(
+                        minHeight: sizer.height(height: 10, context: context),
+                        maxHeight: sizer.height(height: 30, context: context),
+                      ),
+                      width: sizer.width(width: 70, context: context),
+                      child: Column(
+                        children: [
+                          Container(
+                            alignment: Alignment.centerLeft,
                             width: sizer.width(width: 70, context: context),
-                            child: Obx(
-                              () => ListView.builder(
-                                // shrinkWrap: true,
-                                itemCount: successfulOrdereditemList.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: sizer.height(
-                                            height: 1, context: context)),
-                                    child: Container(
-                                      child: Text(
-                                        "● " +
-                                            successfulOrdereditemList[index]
-                                                .productName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
+                            child: Text(
+                              "Successful Ordered Items",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-          ),
-          SizedBox(
-            height: sizer.height(height: 1, context: context),
-          ),
-          Obx(
-            () => notAvailableItemsList.isEmpty
-                ? SizedBox(
-                    height: sizer.height(height: 1, context: context),
-                  )
-                : Container(
-                    constraints: BoxConstraints(
-                      minHeight: sizer.height(height: 10, context: context),
-                      maxHeight: sizer.height(height: 30, context: context),
-                    ),
-                    width: sizer.width(width: 70, context: context),
-                    child: Column(
-                      children: [
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: sizer.width(width: 70, context: context),
-                          child: Text(
-                            "Unsuccessful Ordered Items",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
+                          SizedBox(
+                            height: sizer.height(height: 2, context: context),
                           ),
-                        ),
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          width: sizer.width(width: 70, context: context),
-                          child: Text(
-                            "Reason: Out of stocks.",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: sizer.height(height: 2, context: context),
-                        ),
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.topLeft,
-                            width: sizer.width(width: 70, context: context),
-                            child: Obx(
-                              () => ListView.builder(
-                                // shrinkWrap: true,
-                                itemCount: notAvailableItemsList.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: sizer.height(
-                                            height: 1, context: context)),
-                                    child: Container(
-                                      child: Text(
-                                        "● " +
-                                            notAvailableItemsList[index]
-                                                .productName,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.topLeft,
+                              width: sizer.width(width: 70, context: context),
+                              child: Obx(
+                                () => ListView.builder(
+                                  // shrinkWrap: true,
+                                  itemCount: successfulOrdereditemList.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: sizer.height(
+                                              height: 1, context: context)),
+                                      child: Container(
+                                        child: Text(
+                                          "● " +
+                                              successfulOrdereditemList[index]
+                                                  .productName,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+            SizedBox(
+              height: sizer.height(height: 1, context: context),
+            ),
+            Obx(
+              () => notAvailableItemsList.isEmpty
+                  ? SizedBox(
+                      height: sizer.height(height: 1, context: context),
+                    )
+                  : Container(
+                      constraints: BoxConstraints(
+                        minHeight: sizer.height(height: 10, context: context),
+                        maxHeight: sizer.height(height: 30, context: context),
+                      ),
+                      width: sizer.width(width: 70, context: context),
+                      child: Column(
+                        children: [
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            width: sizer.width(width: 70, context: context),
+                            child: Text(
+                              "Unsuccessful Ordered Items",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            width: sizer.width(width: 70, context: context),
+                            child: Text(
+                              "Reason: Out of stocks.",
+                              style: TextStyle(
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: sizer.height(height: 2, context: context),
+                          ),
+                          Expanded(
+                            child: Container(
+                              alignment: Alignment.topLeft,
+                              width: sizer.width(width: 70, context: context),
+                              child: Obx(
+                                () => ListView.builder(
+                                  // shrinkWrap: true,
+                                  itemCount: notAvailableItemsList.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: sizer.height(
+                                              height: 1, context: context)),
+                                      child: Container(
+                                        child: Text(
+                                          "● " +
+                                              notAvailableItemsList[index]
+                                                  .productName,
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
-    ));
+      barrierDismissible: false,
+    );
   }
 }

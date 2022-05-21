@@ -64,6 +64,7 @@ class TrackOrder {
     required this.customerid,
     required this.storeid,
     required this.status,
+    required this.isDelivery,
   });
 
   String orderid;
@@ -72,6 +73,7 @@ class TrackOrder {
   String customerid;
   String storeid;
   String status;
+  bool isDelivery;
 
   factory TrackOrder.fromJson(Map<String, dynamic> json) => TrackOrder(
         orderid: json["orderid"],
@@ -80,6 +82,7 @@ class TrackOrder {
         customerid: json["customerid"],
         storeid: json["storeid"],
         status: json["status"],
+        isDelivery: json["isDelivery"].toString() == "true" ? true : false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -89,6 +92,7 @@ class TrackOrder {
         "customerid": customerid,
         "storeid": storeid,
         "status": status,
+        "isDelivery": isDelivery,
       };
 }
 

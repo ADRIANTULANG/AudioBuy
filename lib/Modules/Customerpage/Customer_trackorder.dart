@@ -38,6 +38,8 @@ class CustomerTrackOrder extends GetView<CustomerController> {
                         ordernumber:
                             controller.trackOrderList[index].ordernumber);
                     Get.to(() => CustomerOrderHistoryDetails(
+                        orderStatus: controller.historyList[index].status,
+                        isDelivery: controller.trackOrderList[index].isDelivery,
                         ordernumber:
                             controller.trackOrderList[index].ordernumber));
                   },

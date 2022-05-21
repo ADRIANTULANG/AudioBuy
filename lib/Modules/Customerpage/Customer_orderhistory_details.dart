@@ -5,9 +5,15 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 class CustomerOrderHistoryDetails extends GetView<CustomerController> {
-  const CustomerOrderHistoryDetails({Key? key, required this.ordernumber})
+  const CustomerOrderHistoryDetails(
+      {Key? key,
+      required this.ordernumber,
+      required this.isDelivery,
+      required this.orderStatus})
       : super(key: key);
   final String? ordernumber;
+  final bool? isDelivery;
+  final String? orderStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +69,7 @@ class CustomerOrderHistoryDetails extends GetView<CustomerController> {
                                       sizer.width(width: 1, context: context),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        color: Colors.grey[500],
                                         borderRadius: BorderRadius.circular(5)),
                                     padding: EdgeInsets.only(
                                         top: sizer.height(
@@ -124,6 +130,50 @@ class CustomerOrderHistoryDetails extends GetView<CustomerController> {
                 ),
               ),
             ),
+            Padding(
+              padding: EdgeInsets.only(
+                left: sizer.width(width: 4, context: context),
+                right: sizer.width(width: 4, context: context),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Order Status:",
+                    style: sizer.style(
+                        context: context, fontsize: 12, color: Colors.black),
+                  ),
+                  Text(
+                    orderStatus.toString(),
+                    style: sizer.style(
+                        context: context, fontsize: 12, color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: sizer.height(height: 1, context: context)),
+            Padding(
+              padding: EdgeInsets.only(
+                left: sizer.width(width: 4, context: context),
+                right: sizer.width(width: 4, context: context),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Payment type:",
+                    style: sizer.style(
+                        context: context, fontsize: 12, color: Colors.black),
+                  ),
+                  Text(
+                    isDelivery == true ? "Cash on Delivery (COD)" : "Pick Up",
+                    style: sizer.style(
+                        context: context, fontsize: 12, color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: sizer.height(height: 1, context: context)),
             Padding(
               padding: EdgeInsets.only(
                 left: sizer.width(width: 4, context: context),

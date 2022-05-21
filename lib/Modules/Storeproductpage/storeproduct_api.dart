@@ -78,6 +78,7 @@ class StoreProductApi {
       {required String storeid,
       required String customerid,
       required String datetime,
+      required String isDelivery,
       required String contactno}) async {
     try {
       var response = await http.post(
@@ -87,11 +88,12 @@ class StoreProductApi {
           'customerid': customerid,
           'timeStamp': datetime,
           'customercontactno': contactno,
+          'isDelivery': isDelivery
         },
       ).timeout(const Duration(seconds: 10), onTimeout: () {
         throw TimeoutException("timeout");
       });
-      // print(response.body);
+      print(response.body);
       // print(json.encode(json.decode(response.body)));
       if (response.statusCode == 200) {
         var status = jsonDecode(response.body)['success'];
@@ -148,25 +150,29 @@ class StoreProductApi {
           if (message == 'Item not available') {
             Get.find<StoreProductController>().hasUnvailableItem.value = true;
             var itemName = jsonDecode(response.body)['productName'];
-            Get.find<StoreProductController>()
-                .notAvailableItemsList
-                .add(NotAvailableItemListModel(productName: itemName));
+            var productID = jsonDecode(response.body)['productID'];
+            Get.find<StoreProductController>().notAvailableItemsList.add(
+                NotAvailableItemListModel(
+                    productName: itemName, productID: productID));
           } else if (message == 'Item not available and available') {
             var itemNameAvailable =
                 jsonDecode(response.body)['productNameAvailable'];
             var itemNameUnavailable = jsonDecode(response.body)['productName'];
+            var productID = jsonDecode(response.body)['productID'];
             Get.find<StoreProductController>().hasUnvailableItem.value = true;
             Get.find<StoreProductController>().notAvailableItemsList.add(
-                NotAvailableItemListModel(productName: itemNameUnavailable));
-            Get.find<StoreProductController>()
-                .successfulOrdereditemList
-                .add(NotAvailableItemListModel(productName: itemNameAvailable));
+                NotAvailableItemListModel(
+                    productName: itemNameUnavailable, productID: productID));
+            Get.find<StoreProductController>().successfulOrdereditemList.add(
+                NotAvailableItemListModel(
+                    productName: itemNameAvailable, productID: productID));
           } else if (message == 'Success') {
             var itemNameAvailable =
                 jsonDecode(response.body)['productNameAvailable'];
-            Get.find<StoreProductController>()
-                .successfulOrdereditemList
-                .add(NotAvailableItemListModel(productName: itemNameAvailable));
+            var productID = jsonDecode(response.body)['productID'];
+            Get.find<StoreProductController>().successfulOrdereditemList.add(
+                NotAvailableItemListModel(
+                    productName: itemNameAvailable, productID: productID));
           }
           return true;
         } else {

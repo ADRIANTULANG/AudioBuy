@@ -187,203 +187,284 @@ class StoreProductView extends GetView<StoreProductController> {
                         ),
                         Expanded(
                           child: Obx(
-                            () => GridView.builder(
-                              gridDelegate:
-                                  const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                              ),
-                              itemCount: controller.storeProducts.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    FocusScope.of(context)
-                                        .requestFocus(new FocusNode());
-                                    controller.selectedProduct =
-                                        controller.storeProducts[index];
-                                    Get.to(() => StoreProductDetailsView());
-                                    controller.searchTextField.clear();
-                                    controller.searchProduct(
-                                        stringtosearch: "");
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.only(
-                                        left: sizer.width(
-                                            width: 2, context: context),
-                                        bottom: sizer.width(
-                                            width: 2, context: context),
-                                        right: sizer.width(
-                                            width: 2, context: context)),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                      height: sizer.height(
-                                          height: 15, context: context),
-                                      width: sizer.width(
-                                          width: 100, context: context),
-                                      child: Column(
-                                        children: [
-                                          Stack(
-                                            alignment:
-                                                AlignmentDirectional.topEnd,
-                                            children: [
-                                              Container(
-                                                decoration: BoxDecoration(
-                                                    image: DecorationImage(
-                                                        fit: BoxFit.cover,
-                                                        image: NetworkImage(
-                                                            '$imageEndpoint/${controller.storeProducts[index].productImage}')),
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                      topLeft:
-                                                          Radius.circular(20),
-                                                      topRight:
-                                                          Radius.circular(20),
-                                                    )),
-                                                height: sizer.height(
-                                                    height: 15,
-                                                    context: context),
-                                                width: sizer.width(
-                                                    width: 100,
-                                                    context: context),
-                                              ),
-                                              Obx(
-                                                () =>
+                            () => controller.storeProducts.isEmpty &&
+                                    controller.isGettingStoreProducts.value ==
+                                        false
+                                ? Container(
+                                    // color: Colors.red,
+                                    height: sizer.height(
+                                        height: 100, context: context),
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                        "Sorry. No Available Products for now."))
+                                : GridView.builder(
+                                    gridDelegate:
+                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                    ),
+                                    itemCount: controller.storeProducts.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          if (controller.storeProducts[index]
+                                                  .productCount !=
+                                              "0") {
+                                            FocusScope.of(context)
+                                                .requestFocus(new FocusNode());
+                                            controller.selectedProduct =
+                                                controller.storeProducts[index];
+                                            Get.to(() =>
+                                                StoreProductDetailsView());
+                                            controller.searchTextField.clear();
+                                            controller.searchProduct(
+                                                stringtosearch: "");
+                                            controller
+                                                .isRegisteredProductDetails
+                                                .value = true;
+                                          }
+                                        },
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                              left: sizer.width(
+                                                  width: 2, context: context),
+                                              bottom: sizer.width(
+                                                  width: 2, context: context),
+                                              right: sizer.width(
+                                                  width: 2, context: context)),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
+                                            height: sizer.height(
+                                                height: 15, context: context),
+                                            width: sizer.width(
+                                                width: 100, context: context),
+                                            child: Column(
+                                              children: [
+                                                Stack(
+                                                  alignment:
+                                                      AlignmentDirectional
+                                                          .topEnd,
+                                                  children: [
+                                                    Container(
+                                                      decoration: BoxDecoration(
+                                                          image: DecorationImage(
+                                                              fit: BoxFit.cover,
+                                                              image: NetworkImage(
+                                                                  '$imageEndpoint/${controller.storeProducts[index].productImage}')),
+                                                          borderRadius:
+                                                              BorderRadius.only(
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                    20),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    20),
+                                                          )),
+                                                      height: sizer.height(
+                                                          height: 15,
+                                                          context: context),
+                                                      width: sizer.width(
+                                                          width: 100,
+                                                          context: context),
+                                                    ),
+                                                    Obx(
+                                                      () => controller
+                                                                  .storeProducts[
+                                                                      index]
+                                                                  .productQuantity
+                                                                  .value ==
+                                                              0
+                                                          ? SizedBox()
+                                                          : Positioned(
+                                                              top: 10,
+                                                              right: 10,
+                                                              child: Container(
+                                                                padding: EdgeInsets.only(
+                                                                    top: sizer.width(
+                                                                        width:
+                                                                            0.5,
+                                                                        context:
+                                                                            context),
+                                                                    bottom: sizer.width(
+                                                                        width:
+                                                                            0.5,
+                                                                        context:
+                                                                            context),
+                                                                    left: sizer.width(
+                                                                        width:
+                                                                            2,
+                                                                        context:
+                                                                            context),
+                                                                    right: sizer.width(
+                                                                        width:
+                                                                            2,
+                                                                        context:
+                                                                            context)),
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(
+                                                                                3),
+                                                                    color: Colors
+                                                                        .black45),
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                child: Obx(
+                                                                    () => Text(
+                                                                          controller
+                                                                              .storeProducts[index]
+                                                                              .productQuantity
+                                                                              .value
+                                                                              .toString(),
+                                                                          style: TextStyle(
+                                                                              fontSize: sizer.font(fontsize: 16, context: context),
+                                                                              fontWeight: FontWeight.bold,
+                                                                              color: Colors.black),
+                                                                        )),
+                                                              ),
+                                                            ),
+                                                    ),
+                                                    Obx(
+                                                      () => controller
+                                                                  .storeProducts[
+                                                                      index]
+                                                                  .productCount !=
+                                                              "0"
+                                                          ? SizedBox()
+                                                          : Positioned(
+                                                              left: sizer.width(
+                                                                  width: -28,
+                                                                  context:
+                                                                      context),
+                                                              height: sizer.height(
+                                                                  height: 15,
+                                                                  context:
+                                                                      context),
+                                                              width: sizer.width(
+                                                                  width: 100,
+                                                                  context:
+                                                                      context),
+                                                              child: Container(
+                                                                height: sizer
+                                                                    .height(
+                                                                        height:
+                                                                            100,
+                                                                        context:
+                                                                            context),
+                                                                width: sizer.width(
+                                                                    width: 100,
+                                                                    context:
+                                                                        context),
+                                                                decoration: BoxDecoration(
+                                                                    image: DecorationImage(
+                                                                        image: AssetImage(
+                                                                            'asset/image/outofstock.png'))),
+                                                              ),
+                                                            ),
+                                                    )
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                    height: sizer.height(
+                                                        height: 0.5,
+                                                        context: context)),
+                                                Container(
+                                                  padding: EdgeInsets.only(
+                                                    left: sizer.width(
+                                                        width: 1,
+                                                        context: context),
+                                                  ),
+                                                  width: sizer.width(
+                                                      width: 100,
+                                                      context: context),
+                                                  child: Text(
+                                                    controller
+                                                        .storeProducts[index]
+                                                        .productName,
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: sizer.font(
+                                                            fontsize: 12,
+                                                            context: context)),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.only(
+                                                    left: sizer.width(
+                                                        width: 1,
+                                                        context: context),
+                                                  ),
+                                                  width: sizer.width(
+                                                      width: 100,
+                                                      context: context),
+                                                  child: Text(
+                                                    "₱ " +
+                                                        double.parse(controller
+                                                                .storeProducts[
+                                                                    index]
+                                                                .productPrice)
+                                                            .toStringAsFixed(2),
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: sizer.font(
+                                                            fontsize: 9,
+                                                            context: context)),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                Container(
+                                                  padding: EdgeInsets.only(
+                                                    left: sizer.width(
+                                                        width: 1,
+                                                        context: context),
+                                                  ),
+                                                  width: sizer.width(
+                                                      width: 100,
+                                                      context: context),
+                                                  child: Text(
                                                     controller
                                                                 .storeProducts[
                                                                     index]
-                                                                .productQuantity
-                                                                .value ==
-                                                            0
-                                                        ? SizedBox()
-                                                        : Positioned(
-                                                            top: 10,
-                                                            right: 10,
-                                                            child: Container(
-                                                              padding: EdgeInsets.only(
-                                                                  top: sizer.width(
-                                                                      width:
-                                                                          0.5,
-                                                                      context:
-                                                                          context),
-                                                                  bottom: sizer.width(
-                                                                      width:
-                                                                          0.5,
-                                                                      context:
-                                                                          context),
-                                                                  left: sizer.width(
-                                                                      width: 2,
-                                                                      context:
-                                                                          context),
-                                                                  right: sizer.width(
-                                                                      width: 2,
-                                                                      context:
-                                                                          context)),
-                                                              decoration: BoxDecoration(
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              3),
-                                                                  color: Colors
-                                                                      .black45),
-                                                              alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                              child:
-                                                                  Obx(
-                                                                      () =>
-                                                                          Text(
-                                                                            controller.storeProducts[index].productQuantity.value.toString(),
-                                                                            style: TextStyle(
-                                                                                fontSize: sizer.font(fontsize: 16, context: context),
-                                                                                fontWeight: FontWeight.bold,
-                                                                                color: Colors.black),
-                                                                          )),
-                                                            ),
-                                                          ),
-                                              )
-                                            ],
-                                          ),
-                                          SizedBox(
-                                              height: sizer.height(
-                                                  height: 0.5,
-                                                  context: context)),
-                                          Container(
-                                            padding: EdgeInsets.only(
-                                              left: sizer.width(
-                                                  width: 1, context: context),
-                                            ),
-                                            width: sizer.width(
-                                                width: 100, context: context),
-                                            child: Text(
-                                              controller.storeProducts[index]
-                                                  .productName,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: sizer.font(
-                                                      fontsize: 12,
-                                                      context: context)),
-                                              overflow: TextOverflow.ellipsis,
+                                                                .productCount ==
+                                                            "1"
+                                                        ? "Stocks: " +
+                                                            controller
+                                                                .storeProducts[
+                                                                    index]
+                                                                .productCount +
+                                                            "-pc."
+                                                        : "Stocks: " +
+                                                            controller
+                                                                .storeProducts[
+                                                                    index]
+                                                                .productCount +
+                                                            "-pcs.",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: sizer.font(
+                                                            fontsize: 9,
+                                                            context: context)),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                )
+                                              ],
                                             ),
                                           ),
-                                          Container(
-                                            padding: EdgeInsets.only(
-                                              left: sizer.width(
-                                                  width: 1, context: context),
-                                            ),
-                                            width: sizer.width(
-                                                width: 100, context: context),
-                                            child: Text(
-                                              "₱ " +
-                                                  double.parse(controller
-                                                          .storeProducts[index]
-                                                          .productPrice)
-                                                      .toStringAsFixed(2),
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: sizer.font(
-                                                      fontsize: 9,
-                                                      context: context)),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: EdgeInsets.only(
-                                              left: sizer.width(
-                                                  width: 1, context: context),
-                                            ),
-                                            width: sizer.width(
-                                                width: 100, context: context),
-                                            child: Text(
-                                              controller.storeProducts[index]
-                                                          .productCount ==
-                                                      "1"
-                                                  ? "Stocks: " +
-                                                      controller
-                                                          .storeProducts[index]
-                                                          .productCount +
-                                                      "-pc."
-                                                  : "Stocks: " +
-                                                      controller
-                                                          .storeProducts[index]
-                                                          .productCount +
-                                                      "-pcs.",
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: sizer.font(
-                                                      fontsize: 9,
-                                                      context: context)),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
                           ),
                         )
                       ],
@@ -413,8 +494,10 @@ class StoreProductView extends GetView<StoreProductController> {
                 child: FloatingActionButton(
                     backgroundColor: Colors.black,
                     onPressed: () async {
-                      await controller.add_to_Cart();
-                      Get.to(() => StoreProductsCheckoutView());
+                      if (controller.count_product().value != "0") {
+                        await controller.add_to_Cart();
+                        Get.to(() => StoreProductsCheckoutView());
+                      }
                     },
                     child: Icon(Icons.shopping_cart)),
               ),

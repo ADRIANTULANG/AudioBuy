@@ -200,16 +200,19 @@ String notAvailableItemListModelToJson(List<NotAvailableItemListModel> data) =>
 class NotAvailableItemListModel {
   NotAvailableItemListModel({
     required this.productName,
+    required this.productID,
   });
 
   String productName;
-
+  String productID;
   factory NotAvailableItemListModel.fromJson(Map<String, dynamic> json) =>
       NotAvailableItemListModel(
         productName: json["productName"],
+        productID: json["productID"],
       );
 
   Map<String, dynamic> toJson() => {
         "productName": productName,
+        "productID": productID,
       };
 }
