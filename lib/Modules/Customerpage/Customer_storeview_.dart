@@ -98,7 +98,7 @@ class StoreView extends GetView<CustomerController> {
                         prefixIcon: Icon(Icons.search),
                         contentPadding:
                             EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-                        hintText: "Search Stores",
+                        hintText: "Search Products",
                         border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(
                           32.0,
